@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const url = "https://readcomicsonline.ru/";
     const response = await axios.get(url);
@@ -13,7 +13,12 @@ export async function GET(request: NextRequest) {
 
     const body = response.data;
     const $ = cheerio.load(body);
-    const comics = [];
+    const comics: {
+      title: string;
+      urlRaw: string;
+      url: string;
+      image: string;
+    }[] = [];
 
     $("#schedule li").each((i, element) => {
       const item = $(element);

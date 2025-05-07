@@ -66,9 +66,14 @@ async function performSearch(title: string) {
       return [];
     }
 
-    return body.suggestions.map((suggestion: any) => {
-      const title = suggestion["value"];
-      const data = suggestion["data"];
+    interface Suggestion {
+      value: string;
+      data: string;
+    }
+
+    return body.suggestions.map((suggestion: Suggestion) => {
+      const title = suggestion.value;
+      const data = suggestion.data;
       const url = `/comic/${data}`;
 
       return {
