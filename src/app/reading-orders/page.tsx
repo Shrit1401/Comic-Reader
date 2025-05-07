@@ -7,9 +7,9 @@ import { Shield, Zap } from "lucide-react";
 import { MarvelReadingOrders } from "./marvel";
 import { DCReadingOrders } from "./dc";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
-export default function ReadingOrdersPage() {
+function ReadingOrdersContent() {
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
   const defaultTab = searchParams.get("tab") || "marvel";
@@ -77,5 +77,19 @@ export default function ReadingOrdersPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReadingOrdersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-primary">Loading...</div>
+        </div>
+      }
+    >
+      <ReadingOrdersContent />
+    </Suspense>
   );
 }
