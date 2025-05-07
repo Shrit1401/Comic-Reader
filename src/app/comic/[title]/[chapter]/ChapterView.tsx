@@ -27,7 +27,7 @@ interface ComicPage {
 }
 
 export default function ChapterView({ params, pages }: ChapterViewProps) {
-  const { title, chapter } = params;
+  const { title } = params;
 
   const [viewMode, setViewMode] = useState<"vertical" | "paged">("vertical");
   const [currentPage, setCurrentPage] = useState(0);
