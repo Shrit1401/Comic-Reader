@@ -13,7 +13,7 @@ export async function GET(
     const response = await axios.get(url);
     const body = response.data;
     const $ = cheerio.load(body);
-    const pages = [];
+    const pages: { image: string }[] = [];
 
     $("#all img").each((i, element) => {
       const item = $(element);
