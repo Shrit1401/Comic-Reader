@@ -6,15 +6,6 @@ type Params = Promise<{
   title: string;
 }>;
 
-type SearchParams = Promise<{
-  [key: string]: string | string[] | undefined;
-}>;
-
-interface Props {
-  params: Params;
-  searchParams: SearchParams;
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -36,8 +27,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page(props: Props) {
-  const { title } = await props.params;
+export default async function Page({ params }: { params: Params }) {
+  const { title } = await params;
   const comic = await getComicDetails(title);
 
   if (!comic) {
