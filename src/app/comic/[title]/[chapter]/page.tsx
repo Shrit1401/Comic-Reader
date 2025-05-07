@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getComicChapter, ComicPage } from "@/services/api";
 import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
