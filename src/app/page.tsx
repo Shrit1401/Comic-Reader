@@ -1,6 +1,7 @@
 import { getHotComics } from "./actions";
 import HomeView from "@/app/HomeView";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -12,5 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const hotComics = await getHotComics();
-  return <HomeView hotComics={hotComics} />;
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeView hotComics={hotComics} />
+    </Suspense>
+  );
 }

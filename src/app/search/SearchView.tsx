@@ -6,14 +6,7 @@ import Link from "next/link";
 import ApiSourceSelector from "../components/ApiSourceSelector";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ArrowLeft, Filter, Lightbulb } from "lucide-react";
 import { toSlug } from "@/lib/utils";

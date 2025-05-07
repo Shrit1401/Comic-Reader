@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HotComic } from "./actions";
 import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
@@ -32,8 +32,18 @@ interface HomeViewProps {
 export default function HomeView({
   hotComics: initialHotComics,
 }: HomeViewProps) {
-  const [hotComics] = useState(initialHotComics);
+  const [hotComics, setHotComics] = useState<HotComic[]>([]);
+  const [mounted, setMounted] = useState(false);
   const {} = useApiSource();
+
+  useEffect(() => {
+    setHotComics(initialHotComics);
+    setMounted(true);
+  }, [initialHotComics]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="container px-4 py-10 mx-auto">
