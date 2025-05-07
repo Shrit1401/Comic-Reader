@@ -84,7 +84,7 @@ export default function HomeView({
               Featured Comics
             </h2>
             <p className="text-muted-foreground mt-2">
-              Discover what's trending in the comic world
+              Discover what&apos;s trending in the comic world
             </p>
           </div>
           <Link href="/search">
