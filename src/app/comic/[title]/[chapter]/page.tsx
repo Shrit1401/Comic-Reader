@@ -1,11 +1,12 @@
 import { getChapterPages } from "./actions";
-import ChapterView from "./ChapterView";
+import ChapterView from "@/app/comic/[title]/[chapter]/ChapterView";
 
 interface ChapterPageProps {
   params: {
     title: string;
     chapter: string;
   };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default async function ChapterPage({ params }: ChapterPageProps) {
