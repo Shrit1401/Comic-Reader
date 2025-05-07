@@ -5,14 +5,22 @@ import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, ArrowRight, Info, BookOpen, Home } from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Maximize2,
+  Minimize2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface ChapterViewProps {
   params: {
@@ -27,200 +35,272 @@ interface ComicPage {
 }
 
 export default function ChapterView({ params, pages }: ChapterViewProps) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [viewMode, setViewMode] = useState<"vertical" | "paged">("vertical");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [pageInput, setPageInput] = useState("");
+
   const { title } = params;
 
-  const [viewMode, setViewMode] = useState<"vertical" | "paged">("vertical");
-  const [currentPage, setCurrentPage] = useState(0);
+  const handlePrevPage = useCallback(() => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  }, []);
 
-  const handlePageChange = useCallback(
-    (direction: "prev" | "next") => {
-      setCurrentPage((prevCurrentPage) => {
-        if (direction === "prev" && prevCurrentPage > 0) {
-          return prevCurrentPage - 1;
-        } else if (direction === "next" && prevCurrentPage < pages.length - 1) {
-          return prevCurrentPage + 1;
-        }
-        return prevCurrentPage;
-      });
-    },
-    [pages.length]
-  );
+  const handleNextPage = useCallback(() => {
+    setCurrentPage((prev) => Math.min(pages.length - 1, prev + 1));
+  }, [pages.length]);
 
-  useEffect(() => {
-    if (viewMode === "paged") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPageInput(value);
+  };
+
+  const handlePageSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(pageInput);
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= pages.length) {
+      setCurrentPage(pageNum - 1);
     }
-  }, [currentPage, viewMode]);
+    setPageInput("");
+  };
 
-  useEffect(() => {
-    if (viewMode !== "paged" || pages.length === 0) {
-      return;
+  const handlePageSelect = (value: string) => {
+    const pageNum = parseInt(value);
+    if (!isNaN(pageNum)) {
+      setCurrentPage(pageNum - 1);
     }
+  };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        handlePageChange("prev");
-      } else if (event.key === "ArrowRight") {
-        handlePageChange("next");
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        handlePrevPage();
+      } else if (e.key === "ArrowRight") {
+        handleNextPage();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [viewMode, pages.length, handlePageChange]);
-
-  const PageNavigation = () => (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex items-center space-x-2 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-full border shadow-lg">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => handlePageChange("prev")}
-        disabled={currentPage === 0}
-      >
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-      <span className="text-sm font-medium">
-        {currentPage + 1} / {pages.length}
-      </span>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => handlePageChange("next")}
-        disabled={currentPage === pages.length - 1}
-      >
-        <ArrowRight className="h-4 w-4" />
-      </Button>
-    </div>
-  );
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handlePrevPage, handleNextPage]);
 
   if (!pages || pages.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center p-6 bg-background">
-        <div className="w-full max-w-4xl mb-8">
-          <div className="flex items-center mb-8">
-            <Link
-              href={`/comic/${title}`}
-              className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to Comic Details
-            </Link>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">No Pages Found</h1>
+          <p className="text-muted-foreground">
+            The chapter you're looking for doesn't exist or has been removed.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button asChild variant="outline">
+              <Link href={`/comic/${title}`}>Back to Comic</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/">Go Home</Link>
+            </Button>
           </div>
-
-          <Card className="border-destructive/50">
-            <CardHeader>
-              <div className="flex items-center text-destructive">
-                <Info className="mr-2 h-5 w-5" />
-                <h2 className="text-lg font-medium">Error</h2>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Chapter not found or has no pages
-              </p>
-            </CardContent>
-            <CardFooter>
-              <div className="flex space-x-4">
-                <Button asChild variant="outline">
-                  <Link
-                    href={`/comic/${title}`}
-                    className="flex items-center gap-2"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Back to Comic
-                  </Link>
-                </Button>
-                <Button asChild variant="secondary">
-                  <Link href="/" className="flex items-center gap-2">
-                    <Home className="h-4 w-4" />
-                    Home
-                  </Link>
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-4 md:p-6 bg-background">
-      <div className="w-full max-w-5xl">
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href={`/comic/${title}`}
-            className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back to Comic Details
-          </Link>
-
-          <Tabs
-            value={viewMode}
-            onValueChange={(v) => setViewMode(v as "vertical" | "paged")}
-            className="hidden md:block"
-          >
-            <TabsList className="grid w-[200px] grid-cols-2">
-              <TabsTrigger value="vertical">Vertical Scroll</TabsTrigger>
-              <TabsTrigger value="paged">Paged View</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {viewMode === "vertical" ? (
-          <div className="w-full flex flex-col items-center">
-            {pages.map((page, index) => (
-              <div
-                key={index}
-                className="w-full flex justify-center max-w-4xl mx-auto"
-                id={`page-${index + 1}`}
+    <div
+      className={`min-h-screen bg-background ${
+        isFullscreen ? "fixed inset-0 z-50" : ""
+      }`}
+    >
+      {/* Navigation Bar */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button asChild variant="ghost" size="sm">
+              <Link
+                href={`/comic/${title}`}
+                className="flex items-center gap-2"
               >
-                <div className="relative w-full aspect-[2/3] max-h-[calc(100vh-150px)] md:max-h-[calc(100vh-50px)] rounded-md shadow-md">
-                  <Image
-                    src={proxyImage(page.image)}
-                    alt={`Page ${index + 1}`}
-                    className="object-contain"
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                    priority={index < 3}
-                    loading={index < 3 ? "eager" : "lazy"}
-                    unoptimized={true}
-                  />
-                </div>
-                <div className="absolute right-4 bottom-4 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium border shadow">
-                  {index + 1} / {pages.length}
-                </div>
+                <ArrowLeft className="h-4 w-4" />
+                Back to Comic
+              </Link>
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              Page {currentPage + 1} of {pages.length}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {viewMode === "paged" && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === pages.length - 1}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                setViewMode(viewMode === "vertical" ? "paged" : "vertical")
+              }
+            >
+              {viewMode === "vertical" ? "Paged View" : "Vertical View"}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Reader Content */}
+      <div
+        className={`${
+          isFullscreen ? "h-[calc(100vh-48px)]" : "min-h-[calc(100vh-48px)]"
+        } overflow-auto`}
+      >
+        {viewMode === "vertical" ? (
+          // Vertical Scroll View
+          <div className="max-w-[1400px] mx-auto px-2 py-4 space-y-2">
+            {pages.map((page, index) => (
+              <div key={index} className="relative w-full">
+                <Image
+                  src={proxyImage(page.image)}
+                  alt={`Page ${index + 1}`}
+                  width={1400}
+                  height={2000}
+                  className="w-full h-auto object-contain"
+                  unoptimized={true}
+                  priority={index < 3}
+                />
               </div>
             ))}
           </div>
         ) : (
-          <div className="w-full flex justify-center">
-            <div className="relative w-full max-w-5xl mx-auto aspect-[2/3] max-h-[calc(100vh-150px)] md:max-h-[calc(100vh-50px)] rounded-md shadow-md border">
-              <Image
-                src={proxyImage(pages[currentPage].image)}
-                alt={`Page ${currentPage + 1}`}
-                className="object-contain"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-                priority
-                unoptimized={true}
-              />
+          // Paged View
+          <div className="h-full flex flex-col">
+            <div className="flex-1 flex items-center justify-center">
+              <div className="relative w-full max-w-[1400px] mx-auto px-4">
+                <div className="relative aspect-[3/4] w-full">
+                  <Image
+                    src={proxyImage(pages[currentPage].image)}
+                    alt={`Page ${currentPage + 1}`}
+                    fill
+                    className="object-contain"
+                    unoptimized={true}
+                    priority
+                  />
+                </div>
+                <div className="absolute inset-y-0 left-0 flex items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-full rounded-none px-4 hover:bg-background/80"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 0}
+                  >
+                    <ArrowLeft className="h-6 w-6" />
+                  </Button>
+                </div>
+                <div className="absolute inset-y-0 right-0 flex items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-full rounded-none px-4 hover:bg-background/80"
+                    onClick={handleNextPage}
+                    disabled={currentPage === pages.length - 1}
+                  >
+                    <ArrowRight className="h-6 w-6" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            <PageNavigation />
+
+            {/* Page Navigation Controls */}
+            <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm border-t py-2">
+              <div className="container mx-auto px-4">
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+
+                  <form
+                    onSubmit={handlePageSubmit}
+                    className="flex items-center gap-2"
+                  >
+                    <Input
+                      type="number"
+                      min={1}
+                      max={pages.length}
+                      value={pageInput}
+                      onChange={handlePageInput}
+                      placeholder={`1-${pages.length}`}
+                      className="w-20 text-center"
+                    />
+                    <Button type="submit" size="sm">
+                      Go
+                    </Button>
+                  </form>
+
+                  <Select
+                    value={(currentPage + 1).toString()}
+                    onValueChange={handlePageSelect}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pages.map((_, index) => (
+                        <SelectItem key={index} value={(index + 1).toString()}>
+                          Page {index + 1}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentPage === pages.length - 1}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
-      </div>
-
-      <div className="w-full max-w-4xl mt-8 flex justify-center">
-        <Button asChild className="flex items-center gap-2">
-          <Link href={`/comic/${title}`}>
-            <BookOpen className="h-4 w-4 mr-2" />
-            Back to Comic
-          </Link>
-        </Button>
       </div>
     </div>
   );
