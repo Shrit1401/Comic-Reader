@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, BookMarked, ArrowLeft, Filter, Lightbulb } from "lucide-react";
+import { Search, ArrowLeft, Filter, Lightbulb } from "lucide-react";
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -158,7 +158,7 @@ export default function SearchPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              ref={searchInputRef as any}
+              ref={searchInputRef}
               type="text"
               value={searchTerm}
               onChange={(e) => {
@@ -262,7 +262,7 @@ export default function SearchPage() {
                     <Search className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <p className="text-lg font-medium">
-                    No comics found matching '{originalSearch}'
+                    No comics found matching &apos;{originalSearch}&apos;
                   </p>
                 </div>
 
