@@ -16,26 +16,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, ArrowLeft, Filter, Lightbulb } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { toSlug } from "@/lib/utils";
 
-interface SearchViewProps {
-  query: string;
-  results: ComicSearchResult[];
-}
-
-export default function SearchView({
-  query: initialQuery,
-  results: initialResults,
-}: SearchViewProps) {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [results, setResults] = useState(initialResults);
+export default function SearchView() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState<ComicSearchResult[]>([]);
   const [suggestions, setSuggestions] = useState<ComicSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [searched, setSearched] = useState(!!initialQuery);
+  const [searched, setSearched] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [originalSearch, setOriginalSearch] = useState(initialQuery);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -81,10 +70,6 @@ export default function SearchView({
     setSearching(true);
     setSearched(true);
     setShowSuggestions(false);
-    setOriginalSearch(searchTerm.trim());
-
-    // Update URL with search query
-    router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
 
     const searchResults = await searchComics(searchTerm.trim());
     setResults(searchResults);
@@ -95,26 +80,22 @@ export default function SearchView({
     setSearchTerm(suggestion.title);
     setSuggestions([]);
     setShowSuggestions(false);
-    setOriginalSearch(suggestion.title);
 
     // Trigger search with the selected suggestion
     setSearching(true);
     setSearched(true);
     setResults([suggestion]);
     setSearching(false);
-
-    // Update URL with search query
-    router.push(`/search?q=${encodeURIComponent(suggestion.title)}`);
   };
 
-  // Generate search tips based on the original search
+  // Generate search tips based on the search term
   const getSearchTips = () => {
-    if (!originalSearch) return null;
+    if (!searchTerm) return null;
 
     const tips = [];
 
     // Check for year pattern
-    if (/\b\d{4}\b/.test(originalSearch)) {
+    if (/\b\d{4}\b/.test(searchTerm)) {
       tips.push(
         "Try searching without the year (e.g., 'Grim' instead of 'Grim 2022')"
       );
@@ -122,8 +103,8 @@ export default function SearchView({
     }
 
     // Multi-word search suggestions
-    if (originalSearch.includes(" ")) {
-      const words = originalSearch.split(/\s+/);
+    if (searchTerm.includes(" ")) {
+      const words = searchTerm.split(/\s+/);
       if (words.length > 1) {
         const longestWord = words.reduce((a, b) =>
           a.length > b.length ? a : b
@@ -196,11 +177,10 @@ export default function SearchView({
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="p-3 hover:bg-accent cursor-pointer flex justify-between items-center"
+                    className="p-3 hover:bg-accent cursor-pointer"
                     onClick={() => handleSelectSuggestion(suggestion)}
                   >
-                    <span className="truncate mr-2">{suggestion.title}</span>
-                    <Badge variant="outline">Comic</Badge>
+                    <span>{suggestion.title}</span>
                   </div>
                 ))}
               </div>
@@ -212,123 +192,68 @@ export default function SearchView({
         </div>
       </form>
 
+      {/* Search Tips */}
+      {searched && getSearchTips() && (
+        <div className="mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center">
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Search Tips
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc list-inside space-y-2">
+                {getSearchTips()?.map((tip, index) => (
+                  <li key={index} className="text-muted-foreground">
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Search Results */}
       {searched && (
         <div>
           {searching ? (
             <div className="space-y-4">
-              {Array(3)
-                .fill(0)
-                .map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4 flex justify-between items-center">
-                      <div className="flex flex-col gap-2">
-                        <Skeleton className="h-5 w-[250px]" />
-                        <Skeleton className="h-4 w-[150px]" />
-                      </div>
-                      <Skeleton className="h-8 w-[80px]" />
-                    </CardContent>
-                  </Card>
-                ))}
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : results.length > 0 ? (
-            <>
-              <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <Search className="mr-2 h-5 w-5" />
-                Search Results
-                <Badge variant="outline" className="ml-2">
-                  {results.length} found
-                </Badge>
-              </h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                {results.map((comic, index) => (
-                  <Card
-                    key={index}
-                    className="overflow-hidden hover:shadow-md transition-all"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start gap-3">
-                        <div className="min-w-0">
-                          <Link
-                            href={`/comic/${toSlug(comic.data)}`}
-                            className="inline-block"
-                          >
-                            <h3 className="font-medium hover:text-primary transition-colors line-clamp-1">
-                              {comic.title}
-                            </h3>
-                          </Link>
-                        </div>
-                        <Badge variant="outline" className="flex-shrink-0">
-                          Comic
-                        </Badge>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0 pb-3 px-4 flex justify-end">
-                      <Button asChild variant="ghost" size="sm">
-                        <Link href={`/comic/${toSlug(comic.data)}`}>
-                          View Details
-                        </Link>
-                      </Button>
-                    </CardFooter>
+            <div className="grid gap-4">
+              {results.map((result, index) => (
+                <Link
+                  key={index}
+                  href={`/comic/${toSlug(result.title)}`}
+                  className="block"
+                >
+                  <Card className="hover:bg-accent transition-colors">
+                    <CardHeader>
+                      <CardTitle>{result.title}</CardTitle>
+                    </CardHeader>
                   </Card>
-                ))}
-              </div>
-            </>
+                </Link>
+              ))}
+            </div>
           ) : (
-            <Card className="bg-muted/30">
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex flex-col items-center text-center">
-                  <div className="rounded-full bg-background p-3 mb-3">
-                    <Search className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-lg font-medium">
-                    No comics found matching &apos;{originalSearch}&apos;
-                  </p>
-                </div>
-
-                {/* Search tips */}
-                {getSearchTips() && (
-                  <div className="bg-card border rounded-md p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Lightbulb className="h-4 w-4 text-amber-500" />
-                      <h3 className="font-medium">Search Tips</h3>
-                    </div>
-                    <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                      {getSearchTips()?.map((tip, index) => (
-                        <li key={index}>{tip}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Quick search alternative buttons */}
-                {originalSearch.includes(" ") && (
-                  <div className="space-y-2">
-                    <p className="font-medium flex items-center gap-2">
-                      <Search className="h-4 w-4" />
-                      Try one of these searches:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {originalSearch
-                        .split(/\s+/)
-                        .filter((word) => word.length > 3)
-                        .map((word, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSearchTerm(word);
-                              handleSearch({
-                                preventDefault: () => {},
-                              } as React.FormEvent);
-                            }}
-                          >
-                            {word}
-                          </Button>
-                        ))}
-                    </div>
-                  </div>
-                )}
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">
+                  No results found. Try adjusting your search terms.
+                </p>
               </CardContent>
             </Card>
           )}
