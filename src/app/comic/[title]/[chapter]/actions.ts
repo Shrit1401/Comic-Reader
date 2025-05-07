@@ -1,16 +1,16 @@
+"use server";
+
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { NextRequest, NextResponse } from "next/server";
 
-// Define interface for comic page object
-interface ComicPage {
+export interface ComicPage {
   image: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(request: NextRequest, context: any) {
-  const { title, chapter } = context.params;
-
+export async function getChapterPages(
+  title: string,
+  chapter: string
+): Promise<ComicPage[]> {
   try {
     const url = `https://readcomicsonline.ru/comic/${title}/${chapter}`;
     const response = await axios.get(url);
@@ -30,12 +30,9 @@ export async function GET(request: NextRequest, context: any) {
       }
     });
 
-    return NextResponse.json(pages);
+    return pages;
   } catch (error) {
     console.error("Error getting comic chapter:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch comic chapter" },
-      { status: 500 }
-    );
+    return [];
   }
 }

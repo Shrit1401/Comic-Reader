@@ -19,9 +19,9 @@ interface Chapter {
 
 export async function GET(
   request: NextRequest,
-  context: { params: { title: string } }
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
-  const title = context.params.title;
+  const title = params.title as string;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}`;
