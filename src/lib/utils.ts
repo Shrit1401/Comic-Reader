@@ -24,3 +24,17 @@ export function proxyImage(url: string): string {
   // For production environment (could include additional logic if needed)
   return `/api/proxy/image?url=${encodeURIComponent(url)}`;
 }
+
+export function toSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphens
+    .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
+    .replace(/\((\d{4})(?:\s*-\s*)?(?:\d{4})?\)/g, "$1"); // Convert (2025) or (2025-) to just 2025
+}
+
+export function fromSlug(slug: string): string {
+  return slug
+    .replace(/-/g, " ") // Replace hyphens with spaces
+    .replace(/\b\w/g, (c) => c.toUpperCase()); // Capitalize first letter of each word
+}
