@@ -1,15 +1,13 @@
-import { searchComics } from "@/app/actions";
 import SearchView from "./SearchView";
+import { Metadata } from "next";
 
-interface SearchPageProps {
-  searchParams: {
-    q?: string;
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Search Comics",
+    description: "Search for your favorite comics and manga",
   };
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q || "";
-  const results = query ? await searchComics(query) : [];
-
-  return <SearchView query={query} results={results} />;
+export default function Page() {
+  return <SearchView query="" results={[]} />;
 }
