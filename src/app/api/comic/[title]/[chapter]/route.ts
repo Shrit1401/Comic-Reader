@@ -7,6 +7,7 @@ interface ComicPage {
   image: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(request: NextRequest, context: any) {
   const { title, chapter } = context.params;
 
