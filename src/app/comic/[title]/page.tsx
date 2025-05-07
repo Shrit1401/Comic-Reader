@@ -1,21 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { getComicDetails, ComicDetail } from "@/services/api";
+import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  BookOpen,
+  Calendar,
+  Eye,
+  Info,
+  BookMarked,
+  ListFilter,
+  Clock,
+} from "lucide-react";
 
 interface ComicDetailPageProps {
-  params: {
+  params: Promise<{
     title: string;
-  };
+  }>;
 }
 
 export default function ComicDetailPage({ params }: ComicDetailPageProps) {
+  // Use React.use() to unwrap the params promise
+  const { title } = use(params);
+
   const [comic, setComic] = useState<ComicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { title } = params;
 
   useEffect(() => {
     const fetchComicDetails = async () => {
@@ -36,147 +62,300 @@ export default function ComicDetailPage({ params }: ComicDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl">Loading comic details...</p>
+      <div className="container py-10 max-w-5xl mx-auto">
+        <div className="flex items-center mb-6">
+          <Link
+            href="/"
+            className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back to Home
+          </Link>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="md:w-1/3">
+            <Skeleton className="w-full aspect-[2/3] rounded-lg" />
+          </div>
+          <div className="md:w-2/3 space-y-4">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <div className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-1/4" />
+              <div className="flex flex-wrap gap-2">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !comic) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <p className="text-red-500 mb-4">{error || "Comic not found"}</p>
-        <Link href="/" className="text-blue-600 hover:underline">
-          Return to Home
-        </Link>
+      <div className="container py-10 max-w-5xl mx-auto">
+        <div className="flex items-center mb-6">
+          <Link
+            href="/"
+            className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back to Home
+          </Link>
+        </div>
+
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center">
+              <Info className="mr-2 h-5 w-5" />
+              Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              {error ||
+                "Comic not found. The requested comic may not exist or is currently unavailable."}
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="outline">
+              <Link href="/search">Search for Comics</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
 
+  const formatChapters = () => {
+    if (!comic.chapters || comic.chapters.length === 0) return [];
+
+    // Group chapters by volume if possible
+    const chapters = [...comic.chapters].sort((a, b) => {
+      // Try to extract chapter numbers for comparison
+      const aNum = parseFloat(a.title.replace(/chapter\s*/i, "")) || 0;
+      const bNum = parseFloat(b.title.replace(/chapter\s*/i, "")) || 0;
+      return bNum - aNum;
+    });
+
+    return chapters;
+  };
+
+  const sortedChapters = formatChapters();
+
   return (
-    <main className="flex min-h-screen flex-col items-center p-6">
-      <Link href="/" className="self-start mb-6 text-blue-600 hover:underline">
-        Back to Home
-      </Link>
+    <div className="container py-10 max-w-5xl mx-auto">
+      <div className="flex items-center mb-6">
+        <Link
+          href="/"
+          className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Back to Home
+        </Link>
+      </div>
 
-      <div className="w-full max-w-4xl">
-        <div className="flex flex-col md:flex-row gap-6 mb-8">
-          {/* Comic Image */}
-          <div className="md:w-1/3">
-            {/* Using img instead of Next.js Image for external URLs */}
-            <Image
-              src={comic.image}
-              width={300}
-              height={450}
-              alt={comic.title}
-              className="w-full object-cover rounded shadow-lg"
-            />
-          </div>
-
-          {/* Comic Info */}
-          <div className="md:w-2/3">
-            <h1 className="text-3xl font-bold mb-3">{comic.title}</h1>
-
-            {comic.otherName && (
-              <p className="text-gray-600 mb-2">
-                Also known as: {comic.otherName}
-              </p>
-            )}
-
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <div>
-                <span className="font-semibold">Type:</span> {comic.type}
-              </div>
-              <div>
-                <span className="font-semibold">Status:</span> {comic.status}
-              </div>
-              <div>
-                <span className="font-semibold">Release Date:</span>{" "}
-                {comic.dateRelease}
-              </div>
-              <div>
-                <span className="font-semibold">Views:</span> {comic.views}
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Comic Image */}
+        <div className="md:w-1/3">
+          {comic.image ? (
+            <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src={proxyImage(comic.image)}
+                width={300}
+                height={450}
+                alt={comic.title}
+                className="w-full h-auto object-cover"
+                unoptimized={true} // Always use unoptimized for external images
+              />
+              <div className="absolute top-2 right-2">
+                <Badge variant="outline" className="opacity-90">
+                  Comic
+                </Badge>
               </div>
             </div>
+          ) : (
+            <div className="w-full aspect-[2/3] bg-muted rounded-lg flex items-center justify-center">
+              <BookMarked className="h-16 w-16 text-muted-foreground/30" />
+            </div>
+          )}
+        </div>
 
-            {/* Categories */}
-            {comic.categories && comic.categories.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-1">Categories:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {comic.categories.map((category, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm"
-                    >
-                      {category.categoryName}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Authors */}
-            {comic.authors && comic.authors.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-1">Authors:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {comic.authors.map((author, index) => (
-                    <span
-                      key={index}
-                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm"
-                    >
-                      {author.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
+        {/* Comic Info */}
+        <div className="md:w-2/3 space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">
+              {comic.title}
+            </h1>
+            {comic.otherName && (
+              <p className="text-muted-foreground">
+                Also known as: <span className="italic">{comic.otherName}</span>
+              </p>
             )}
           </div>
-        </div>
 
-        {/* Description */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Description</h2>
-          <p className="text-gray-700 whitespace-pre-line">
-            {comic.description}
-          </p>
-        </div>
+          <div className="grid grid-cols-2 gap-y-3 text-sm">
+            <div className="flex items-center">
+              <Badge variant="outline" className="mr-2">
+                {comic.type}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={
+                  comic.status === "Ongoing"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+                    : comic.status === "Completed"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
+                    : ""
+                }
+              >
+                {comic.status}
+              </Badge>
+            </div>
 
-        {/* Chapters */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Chapters</h2>
-          {comic.chapters && comic.chapters.length > 0 ? (
-            <ul className="space-y-2 mb-6">
-              {comic.chapters.map((chapter, index) => {
-                // Extract the chapter number from the URL
-                const chapterNumber = chapter.urlRaw.split("/").pop();
+            <div className="flex items-center">
+              <Eye className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span>{comic.views}</span>
+            </div>
 
-                return (
-                  <li
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span>Released: {comic.dateRelease}</span>
+            </div>
+          </div>
+
+          {/* Authors */}
+          {comic.authors && comic.authors.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium mb-2">Authors</h3>
+              <div className="flex flex-wrap gap-2">
+                {comic.authors.map((author, index) => (
+                  <div
                     key={index}
-                    className="border p-3 rounded hover:bg-gray-50"
+                    className="flex items-center space-x-2 bg-muted rounded-full pl-1 pr-3 py-0.5"
                   >
-                    <Link
-                      href={`/comic/${title}/${chapterNumber}`}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="text-blue-600 hover:underline">
-                        {chapter.title}
-                      </span>
-                      <span className="text-gray-500 text-sm">
-                        {chapter.date}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-gray-500">No chapters available</p>
+                    <Avatar className="h-5 w-5">
+                      <AvatarFallback className="text-[10px]">
+                        {author.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{author.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Categories */}
+          {comic.categories && comic.categories.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium mb-2">Categories</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {comic.categories.map((category, index) => (
+                  <Badge key={index} variant="secondary" className="rounded-sm">
+                    {category.categoryName}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* First chapter button */}
+          {sortedChapters.length > 0 && (
+            <Button asChild className="mt-4">
+              <Link
+                href={`/comic/${title}/${sortedChapters[
+                  sortedChapters.length - 1
+                ].urlRaw
+                  .split("/")
+                  .pop()}`}
+                className="flex items-center gap-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                Start Reading
+              </Link>
+            </Button>
           )}
         </div>
       </div>
-    </main>
+
+      <Tabs defaultValue="about" className="mt-10">
+        <TabsList className="w-full border-b pb-0 mb-6">
+          <TabsTrigger value="about" className="gap-2">
+            <Info className="h-4 w-4" />
+            About
+          </TabsTrigger>
+          <TabsTrigger value="chapters" className="gap-2">
+            <ListFilter className="h-4 w-4" />
+            Chapters ({sortedChapters.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="about" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground whitespace-pre-line">
+                {comic.description}
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chapters" className="mt-0">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex justify-between items-center">
+                <span>All Chapters</span>
+                <Badge variant="outline" className="ml-2">
+                  {sortedChapters.length} chapters
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {sortedChapters.length > 0 ? (
+                <div className="divide-y">
+                  {sortedChapters.map((chapter, index) => {
+                    const chapterNumber = chapter.urlRaw.split("/").pop();
+                    return (
+                      <Link
+                        key={index}
+                        href={`/comic/${title}/${chapterNumber}`}
+                        className="flex justify-between items-center p-4 hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center">
+                          <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span>{chapter.title}</span>
+                        </div>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>{chapter.date}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <BookMarked className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">No chapters available</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

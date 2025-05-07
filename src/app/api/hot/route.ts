@@ -21,10 +21,15 @@ export async function GET(request: NextRequest) {
       const urlRaw = item.find(".schedule-name a").attr("href") || "";
       const comicId = urlRaw.substr(urlRaw.lastIndexOf("/") + 1);
 
+      // Extract the cover image URL
+      const imageElement = item.find("img");
+      const image = imageElement.attr("src") || "";
+
       const comic = {
         title,
         urlRaw,
         url: `/comic/${comicId}`,
+        image: image,
       };
 
       comics.push(comic);

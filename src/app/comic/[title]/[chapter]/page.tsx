@@ -1,22 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { getComicChapter, ComicPage } from "@/services/api";
+import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Info,
+  Loader2,
+  BookOpen,
+  Home,
+} from "lucide-react";
 
 interface ChapterPageProps {
-  params: {
+  params: Promise<{
     title: string;
     chapter: string;
-  };
+  }>;
 }
 
 export default function ChapterPage({ params }: ChapterPageProps) {
+  const { title, chapter } = use(params);
+
   const [pages, setPages] = useState<ComicPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { title, chapter } = params;
+  const [viewMode, setViewMode] = useState<"vertical" | "paged">("vertical");
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     const fetchChapterPages = async () => {
@@ -35,69 +56,222 @@ export default function ChapterPage({ params }: ChapterPageProps) {
     fetchChapterPages();
   }, [title, chapter]);
 
+  const handlePageChange = useCallback(
+    (direction: "prev" | "next") => {
+      setCurrentPage((prevCurrentPage) => {
+        if (direction === "prev" && prevCurrentPage > 0) {
+          return prevCurrentPage - 1;
+        } else if (direction === "next" && prevCurrentPage < pages.length - 1) {
+          return prevCurrentPage + 1;
+        }
+        return prevCurrentPage;
+      });
+    },
+    [pages.length]
+  );
+
+  useEffect(() => {
+    if (viewMode === "paged") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage, viewMode]);
+
+  useEffect(() => {
+    if (viewMode !== "paged" || pages.length === 0) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        handlePageChange("prev");
+      } else if (event.key === "ArrowRight") {
+        handlePageChange("next");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [viewMode, pages.length, handlePageChange]);
+
+  const PageNavigation = () => (
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex items-center space-x-2 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-full border shadow-lg">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => handlePageChange("prev")}
+        disabled={currentPage === 0}
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      <span className="text-sm font-medium">
+        {currentPage + 1} / {pages.length}
+      </span>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => handlePageChange("next")}
+        disabled={currentPage === pages.length - 1}
+      >
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl">Loading chapter pages...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
+        <div className="w-full max-w-4xl mb-8">
+          <div className="flex items-center mb-8">
+            <Link
+              href={`/comic/${title}`}
+              className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Back to Comic Details
+            </Link>
+          </div>
+
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mb-4" />
+            <p className="text-lg font-medium">Loading chapter images...</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              This may take a moment
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || pages.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <p className="text-red-500 mb-4">
-          {error || "Chapter not found or has no pages"}
-        </p>
-        <Link
-          href={`/comic/${title}`}
-          className="text-blue-600 hover:underline"
-        >
-          Return to Comic
-        </Link>
+      <div className="min-h-screen flex flex-col items-center p-6 bg-background">
+        <div className="w-full max-w-4xl mb-8">
+          <div className="flex items-center mb-8">
+            <Link
+              href={`/comic/${title}`}
+              className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Back to Comic Details
+            </Link>
+          </div>
+
+          <Card className="border-destructive/50">
+            <CardHeader>
+              <div className="flex items-center text-destructive">
+                <Info className="mr-2 h-5 w-5" />
+                <h2 className="text-lg font-medium">Error</h2>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                {error || "Chapter not found or has no pages"}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <div className="flex space-x-4">
+                <Button asChild variant="outline">
+                  <Link
+                    href={`/comic/${title}`}
+                    className="flex items-center gap-2"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Back to Comic
+                  </Link>
+                </Button>
+                <Button asChild variant="secondary">
+                  <Link href="/" className="flex items-center gap-2">
+                    <Home className="h-4 w-4" />
+                    Home
+                  </Link>
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-6 bg-gray-900">
-      <div className="w-full max-w-4xl mb-6 flex justify-between items-center bg-gray-800 p-4 rounded text-white">
-        <Link
-          href={`/comic/${title}`}
-          className="text-blue-400 hover:underline"
-        >
-          Back to Comic Details
-        </Link>
-        <h1 className="text-xl font-bold">Chapter {chapter}</h1>
-      </div>
+    <div className="min-h-screen flex flex-col items-center p-4 md:p-6 bg-background">
+      <div className="w-full max-w-5xl">
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href={`/comic/${title}`}
+            className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back to Comic Details
+          </Link>
 
-      <div className="w-full max-w-4xl">
-        {pages.map((page, index) => (
-          <div key={index} className="flex justify-center">
-            <Image
-              src={page.image}
-              alt={`Page ${index + 1}`}
-              className="max-w-full h-auto object-contain"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-              width={1200}
-              height={1800}
-              priority={index === 0}
-              loading={index === 0 ? "eager" : "lazy"}
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzMzMzMzMyIvPjwvc3ZnPg=="
-            />
+          <Tabs
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as "vertical" | "paged")}
+            className="hidden md:block"
+          >
+            <TabsList className="grid w-[200px] grid-cols-2">
+              <TabsTrigger value="vertical">Vertical Scroll</TabsTrigger>
+              <TabsTrigger value="paged">Paged View</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {viewMode === "vertical" ? (
+          <div className="w-full flex flex-col items-center">
+            {pages.map((page, index) => (
+              <div
+                key={index}
+                className="w-full flex justify-center max-w-4xl mx-auto"
+                id={`page-${index + 1}`}
+              >
+                <div className="relative w-full aspect-[2/3] max-h-[calc(100vh-150px)] md:max-h-[calc(100vh-50px)] rounded-md shadow-md">
+                  <Image
+                    src={proxyImage(page.image)}
+                    alt={`Page ${index + 1}`}
+                    className="object-contain"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+                    priority={index < 3}
+                    loading={index < 3 ? "eager" : "lazy"}
+                    unoptimized={true}
+                  />
+                </div>
+                <div className="absolute right-4 bottom-4 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium border shadow">
+                  {index + 1} / {pages.length}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="w-full flex justify-center">
+            <div className="relative w-full max-w-5xl mx-auto aspect-[2/3] max-h-[calc(100vh-150px)] md:max-h-[calc(100vh-50px)] rounded-md shadow-md border">
+              <Image
+                src={proxyImage(pages[currentPage].image)}
+                alt={`Page ${currentPage + 1}`}
+                className="object-contain"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
+                priority
+                unoptimized={true}
+              />
+            </div>
+            <PageNavigation />
+          </div>
+        )}
       </div>
 
-      <div className="w-full max-w-4xl mt-6 text-center">
-        <Link
-          href={`/comic/${title}`}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-        >
-          Back to Comic
-        </Link>
+      <div className="w-full max-w-4xl mt-8 flex justify-center">
+        <Button asChild className="flex items-center gap-2">
+          <Link href={`/comic/${title}`}>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Back to Comic
+          </Link>
+        </Button>
       </div>
-    </main>
+    </div>
   );
 }

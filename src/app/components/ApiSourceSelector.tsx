@@ -17,8 +17,7 @@ export default function ApiSourceSelector() {
             />
           </svg>
           <span className="text-blue-700">
-            Comic &amp; Manga Platform - Access both Western comics and Japanese
-            manga
+            Comic Platform - Access your favorite comics online
           </span>
         </div>
       </div>

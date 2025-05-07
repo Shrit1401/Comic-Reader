@@ -12,10 +12,10 @@ const ApiSourceContext = createContext<ApiSourceContextType | undefined>(
   undefined
 );
 
-// Simplified provider that always uses the unified source
+// Simplified provider that always uses the default source
 export function ApiSourceProvider({ children }: { children: ReactNode }) {
-  // Fixed value for unified source
-  const apiSource: ApiSource = "unified";
+  // Fixed value for default source
+  const apiSource: ApiSource = "default";
 
   return (
     <ApiSourceContext.Provider value={{ apiSource }}>
