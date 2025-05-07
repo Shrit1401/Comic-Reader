@@ -1,11 +1,13 @@
 import { getChapterPages } from "./actions";
 import ChapterView from "@/app/comic/[title]/[chapter]/ChapterView";
 
+type Params = {
+  title: string;
+  chapter: string;
+};
+
 interface Props {
-  params: {
-    title: string;
-    chapter: string;
-  };
+  params: Params;
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
