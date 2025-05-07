@@ -15,7 +15,10 @@ interface RouteParams {
   };
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { title: string; chapter: string } }
+) {
   const { title, chapter } = params;
 
   try {
