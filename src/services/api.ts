@@ -1,5 +1,25 @@
 import axios from "axios";
 
+// API sources configuration
+export type ApiSource = "default";
+
+// Default source is your current implementation
+let currentApiSource: ApiSource = "default";
+
+// Function to change API source
+export const setApiSource = (source: ApiSource) => {
+  currentApiSource = source;
+};
+
+export const getCurrentApiSource = (): ApiSource => {
+  return currentApiSource;
+};
+
+// Constants for API URLs
+const API_URLS = {
+  default: "", // Empty means use relative URLs with current domain
+};
+
 // Types
 export interface ComicSearchResult {
   title: string;
@@ -46,13 +66,19 @@ export interface HotComic {
   url: string;
 }
 
+// Helper function to get the base URL for API calls
+const getApiBaseUrl = () => {
+  return API_URLS[currentApiSource];
+};
+
 // API functions
 export const searchComics = async (
   title: string
 ): Promise<ComicSearchResult[]> => {
   try {
+    const baseUrl = getApiBaseUrl();
     const response = await axios.get(
-      `/api/search/${encodeURIComponent(title)}`
+      `${baseUrl}/api/search/${encodeURIComponent(title)}`
     );
     return response.data;
   } catch (error) {
@@ -65,7 +91,8 @@ export const getComicDetails = async (
   title: string
 ): Promise<ComicDetail | null> => {
   try {
-    const response = await axios.get(`/api/comic/${title}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await axios.get(`${baseUrl}/api/comic/${title}`);
     return response.data;
   } catch (error) {
     console.error("Error getting comic details:", error);
@@ -78,7 +105,10 @@ export const getComicChapter = async (
   chapter: string
 ): Promise<ComicPage[]> => {
   try {
-    const response = await axios.get(`/api/comic/${title}/${chapter}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await axios.get(
+      `${baseUrl}/api/comic/${title}/${chapter}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error getting comic chapter:", error);
@@ -88,7 +118,8 @@ export const getComicChapter = async (
 
 export const getHotComics = async (): Promise<HotComic[]> => {
   try {
-    const response = await axios.get("/api/hot");
+    const baseUrl = getApiBaseUrl();
+    const response = await axios.get(`${baseUrl}/api/hot`);
     return response.data;
   } catch (error) {
     console.error("Error getting hot comics:", error);
