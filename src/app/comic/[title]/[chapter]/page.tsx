@@ -23,14 +23,14 @@ import {
 } from "lucide-react";
 
 interface ChapterPageProps {
-  params: Promise<{
+  params: {
     title: string;
     chapter: string;
-  }>;
+  };
 }
 
 export default function ChapterPage({ params }: ChapterPageProps) {
-  const { title, chapter } = use(params);
+  const { title, chapter } = params;
 
   const [pages, setPages] = useState<ComicPage[]>([]);
   const [loading, setLoading] = useState(true);

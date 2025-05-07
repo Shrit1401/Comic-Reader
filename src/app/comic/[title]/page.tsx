@@ -29,14 +29,13 @@ import {
 } from "lucide-react";
 
 interface ComicDetailPageProps {
-  params: Promise<{
+  params: {
     title: string;
-  }>;
+  };
 }
 
 export default function ComicDetailPage({ params }: ComicDetailPageProps) {
-  // Use React.use() to unwrap the params promise
-  const { title } = use(params);
+  const { title } = params;
 
   const [comic, setComic] = useState<ComicDetail | null>(null);
   const [loading, setLoading] = useState(true);

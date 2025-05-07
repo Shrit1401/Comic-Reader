@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { title: string } }
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
-  const originalTitle = params.title;
+  const originalTitle = params.title as string;
 
   // Try different search strategies until we find results
   const searchStrategies = [

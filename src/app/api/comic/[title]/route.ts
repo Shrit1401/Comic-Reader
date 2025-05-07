@@ -2,11 +2,26 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { NextRequest, NextResponse } from "next/server";
 
+interface Author {
+  name: string;
+}
+
+interface Category {
+  categoryName: string;
+}
+
+interface Chapter {
+  title: string;
+  urlRaw: string;
+  url: string;
+  date: string;
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { title: string } }
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
-  const title = params.title;
+  const title = params.title as string;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}`;
@@ -20,7 +35,7 @@ export async function GET(
       .text()
       .trim();
 
-    const image = `https:${$(".img-responsive").attr("src").trim()}`;
+    const image = `https:${$(".img-responsive").attr("src")?.trim() || ""}`;
 
     const type = $(".dl-horizontal > dd:nth-child(2)").text().trim();
 
@@ -28,7 +43,7 @@ export async function GET(
 
     const otherName = $(".dl-horizontal > dd:nth-child(6)").text().trim();
 
-    const authors = [];
+    const authors: Author[] = [];
     $(".dl-horizontal > dd:nth-child(8)").each((i, element) => {
       const item = $(element);
       const name = item.find("a").text();
@@ -40,7 +55,7 @@ export async function GET(
 
     const dateRelease = $(".dl-horizontal > dd:nth-child(10)").text();
 
-    const categories = [];
+    const categories: Category[] = [];
     $(".dl-horizontal > dd:nth-child(12)").each((i, element) => {
       const item = $(element);
       const categoryName = item.find("a").text();
@@ -54,7 +69,7 @@ export async function GET(
 
     const description = $(".manga > p:nth-child(2)").text().trim();
 
-    const chapters = [];
+    const chapters: Chapter[] = [];
     $(".chapters li").each((i, element) => {
       const item = $(element);
       const chapterTitle = item

@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { title: string; chapter: string } }
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
-  const { title, chapter } = context.params;
+  const title = params.title as string;
+  const chapter = params.chapter as string;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}/${chapter}`;
