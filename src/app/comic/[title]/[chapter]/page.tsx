@@ -7,9 +7,13 @@ type Params = Promise<{
   chapter: string;
 }>;
 
+type SearchParams = Promise<{
+  [key: string]: string | string[] | undefined;
+}>;
+
 interface Props {
   params: Params;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: SearchParams;
 }
 
 export async function generateMetadata({
@@ -27,6 +31,7 @@ export async function generateMetadata({
 
 export default async function Page(props: Props) {
   const { title, chapter } = await props.params;
+  const searchParams = await props.searchParams;
   const pages = await getChapterPages(title, chapter);
 
   return <ChapterView params={{ title, chapter }} pages={pages} />;

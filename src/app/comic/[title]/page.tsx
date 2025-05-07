@@ -6,9 +6,13 @@ type Params = Promise<{
   title: string;
 }>;
 
+type SearchParams = Promise<{
+  [key: string]: string | string[] | undefined;
+}>;
+
 interface Props {
   params: Params;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: SearchParams;
 }
 
 export async function generateMetadata({
