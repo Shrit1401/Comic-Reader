@@ -91,7 +91,8 @@ export default function ChapterView({ params, pages }: ChapterViewProps) {
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">No Pages Found</h1>
           <p className="text-muted-foreground">
-            The chapter you're looking for doesn't exist or has been removed.
+            We couldn&apos;t find any pages for this chapter. Please try another
+            chapter.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="outline">
