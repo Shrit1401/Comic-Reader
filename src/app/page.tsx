@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: Props) {
+export default async function Page() {
   const hotComics = await getHotComics();
   return <HomeView hotComics={hotComics} />;
 }
