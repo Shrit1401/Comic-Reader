@@ -5,7 +5,6 @@ import { HotComic } from "./actions";
 import { proxyImage } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import ApiSourceSelector from "./components/ApiSourceSelector";
 import { useApiSource } from "./components/ApiSourceProvider";
 import {
   Card,
@@ -22,15 +21,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BookOpen,
-  TrendingUp,
-  Settings,
-  BookMarked,
-  Shield,
-  Zap,
-} from "lucide-react";
+import { BookOpen, BookMarked } from "lucide-react";
 
 interface HomeViewProps {
   hotComics: HotComic[];
