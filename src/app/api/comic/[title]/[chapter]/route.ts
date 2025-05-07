@@ -7,13 +7,13 @@ interface ComicPage {
   image: string;
 }
 
-// Define params type
-type RouteParams = {
+// Updated params type to match Next.js expectations
+interface RouteParams {
   params: {
     title: string;
     chapter: string;
   };
-};
+}
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const { title, chapter } = params;
