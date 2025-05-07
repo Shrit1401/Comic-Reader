@@ -32,8 +32,8 @@ interface HomeViewProps {
 export default function HomeView({
   hotComics: initialHotComics,
 }: HomeViewProps) {
-  const [hotComics, setHotComics] = useState(initialHotComics);
-  const { apiSource } = useApiSource();
+  const [hotComics] = useState(initialHotComics);
+  const {} = useApiSource();
 
   return (
     <div className="container px-4 py-10 mx-auto">
