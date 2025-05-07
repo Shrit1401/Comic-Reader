@@ -1,11 +1,44 @@
 import { getComicDetails } from "@/app/actions";
-import ComicDetailView from "./ComicDetailView";
+import ComicDetailView from "@/app/comic/[title]/ComicDetailView";
+import { Metadata } from "next";
 
-export default async function ComicDetailPage({
+type Params = Promise<{
+  title: string;
+}>;
+
+interface Props {
+  params: Params;
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export async function generateMetadata({
   params,
 }: {
-  params: { title: string };
-}) {
-  const comic = await getComicDetails(params.title);
+  params: Params;
+}): Promise<Metadata> {
+  const { title } = await params;
+  const comic = await getComicDetails(title);
+
+  if (!comic) {
+    return {
+      title: title,
+      description: `Comic not found`,
+    };
+  }
+
+  return {
+    title: comic.title,
+    description: comic.description || `Read ${comic.title} online`,
+  };
+}
+
+export default async function Page(props: Props) {
+  const { title } = await props.params;
+  const comic = await getComicDetails(title);
+
+  if (!comic) {
+    return <div>Comic not found</div>;
+  }
+
   return <ComicDetailView comic={comic} />;
 }
