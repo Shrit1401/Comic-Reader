@@ -7,11 +7,16 @@ interface ComicPage {
   image: string;
 }
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { title: string; chapter: string } }
-) {
-  const { title, chapter } = context.params;
+// Define params type
+type RouteParams = {
+  params: {
+    title: string;
+    chapter: string;
+  };
+};
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { title, chapter } = params;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}/${chapter}`;
