@@ -2,14 +2,6 @@ import { getHotComics } from "./actions";
 import HomeView from "@/app/HomeView";
 import { Metadata } from "next";
 
-type SearchParams = Promise<{
-  [key: string]: string | string[] | undefined;
-}>;
-
-interface Props {
-  searchParams: SearchParams;
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Comic Reader - Read Comics Online",

@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
-import { ApiSource } from "@/services/api";
+
+// Define ApiSource type directly since the import is not available
+type ApiSource = "default";
 
 // Create a simplified context for backward compatibility
 interface ApiSourceContextType {
