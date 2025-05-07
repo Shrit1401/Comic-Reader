@@ -9,9 +9,9 @@ interface ComicPage {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { title: string; chapter: string } }
+  context: { params: { title: string; chapter: string } }
 ) {
-  const { title, chapter } = params;
+  const { title, chapter } = context.params;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}/${chapter}`;
