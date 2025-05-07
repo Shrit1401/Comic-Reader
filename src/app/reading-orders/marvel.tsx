@@ -17,7 +17,7 @@ export const MarvelReadingOrders = () => {
               <li>1. Amazing Fantasy #15 (1962)</li>
               <li>2. Amazing Spider-Man #1-50</li>
               <li>3. The Night Gwen Stacy Died</li>
-              <li>4. Kraven's Last Hunt</li>
+              <li>4. Kraven&apos;s Last Hunt</li>
             </ul>
           </div>
           <div>

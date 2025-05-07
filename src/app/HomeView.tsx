@@ -188,8 +188,8 @@ export default function HomeView({
                 </h3>
                 <p className="mb-6 text-sm text-muted-foreground">
                   The brilliant and ruthless ruler of Latveria, Victor von
-                  Doom's journey from brilliant scientist to one of Marvel's
-                  most complex villains.
+                  Doom&apos;s journey from brilliant scientist to one of
+                  Marvel&apos;s most complex villains.
                 </p>
                 <div className="space-y-6">
                   <div>
@@ -206,7 +206,8 @@ export default function HomeView({
                             Books of Doom (2005)
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            Doom's origin story and rise to power in Latveria
+                            Doom&apos;s origin story and rise to power in
+                            Latveria
                           </p>
                         </div>
                       </li>
@@ -239,7 +240,8 @@ export default function HomeView({
                             Doctor Doom (2019)
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            Doom's solo series exploring his complex morality
+                            Doom&apos;s solo series exploring his complex
+                            morality
                           </p>
                         </div>
                       </li>
@@ -283,8 +285,9 @@ export default function HomeView({
                   Invincible
                 </h3>
                 <p className="mb-6 text-sm text-muted-foreground">
-                  Mark Grayson's journey from discovering his powers to becoming
-                  Earth's greatest hero in this epic Image Comics series.
+                  Mark Grayson&apos;s journey from discovering his powers to
+                  becoming Earth&apos;s greatest hero in this epic Image Comics
+                  series.
                 </p>
                 <div className="space-y-6">
                   <div>
@@ -378,8 +381,9 @@ export default function HomeView({
                   Batman
                 </h3>
                 <p className="mb-6 text-sm text-muted-foreground">
-                  The Dark Knight's journey from his early days to becoming
-                  Gotham's greatest protector in this essential reading order.
+                  The Dark Knight&apos;s journey from his early days to becoming
+                  Gotham&apos;s greatest protector in this essential reading
+                  order.
                 </p>
                 <div className="space-y-6">
                   <div>
@@ -396,7 +400,7 @@ export default function HomeView({
                             Year One
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            Batman's first year fighting crime in Gotham
+                            Batman&apos;s first year fighting crime in Gotham
                           </p>
                         </div>
                       </li>
@@ -409,7 +413,8 @@ export default function HomeView({
                             The Long Halloween
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            A year-long mystery with Gotham's rogues gallery
+                            A year-long mystery with Gotham&apos;s rogues
+                            gallery
                           </p>
                         </div>
                       </li>
@@ -429,7 +434,7 @@ export default function HomeView({
                             The Dark Knight Returns
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            An older Batman's return to crimefighting
+                            An older Batman&apos;s return to crimefighting
                           </p>
                         </div>
                       </li>
@@ -440,7 +445,7 @@ export default function HomeView({
                         <div>
                           <span className="text-muted-foreground">Hush</span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            A mysterious villain targets Batman's allies
+                            A mysterious villain targets Batman&apos;s allies
                           </p>
                         </div>
                       </li>
@@ -453,7 +458,7 @@ export default function HomeView({
                             The Killing Joke
                           </span>
                           <p className="text-xs text-muted-foreground/70 mt-1">
-                            Joker's origin and attack on Gordon family
+                            Joker&apos;s origin and attack on Gordon family
                           </p>
                         </div>
                       </li>
