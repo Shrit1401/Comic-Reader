@@ -4,16 +4,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { title: string; chapter: string } }
+  { params }: { params: { title: string; chapter: string } }
 ) {
-  const { title, chapter } = context.params;
+  const { title, chapter } = params;
 
   try {
     const url = `https://readcomicsonline.ru/comic/${title}/${chapter}`;
     const response = await axios.get(url);
     const body = response.data;
     const $ = cheerio.load(body);
-    const pages: { image: string }[] = [];
+    const pages: any[] = [];
 
     $("#all img").each((i, element) => {
       const item = $(element);
