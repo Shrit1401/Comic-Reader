@@ -2,6 +2,11 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { NextRequest, NextResponse } from "next/server";
 
+// Define interface for comic page object
+interface ComicPage {
+  image: string;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { title: string; chapter: string } }
@@ -13,14 +18,14 @@ export async function GET(
     const response = await axios.get(url);
     const body = response.data;
     const $ = cheerio.load(body);
-    const pages: any[] = [];
+    const pages: ComicPage[] = [];
 
     $("#all img").each((i, element) => {
       const item = $(element);
       const image = item.attr("data-src")?.trim();
 
       if (image) {
-        const page = {
+        const page: ComicPage = {
           image,
         };
         pages.push(page);
