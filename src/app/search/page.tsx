@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { searchComics, ComicSearchResult } from "@/services/api";
 import Link from "next/link";
+import ApiSourceSelector from "../components/ApiSourceSelector";
+import MangaDexBanner from "../components/MangaDexBanner";
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,6 +117,14 @@ export default function SearchPage() {
 
       <h1 className="text-3xl font-bold mb-8">Search Comics</h1>
 
+      {/* Added API Source Selector */}
+      <div className="w-full max-w-3xl mb-6">
+        <ApiSourceSelector />
+      </div>
+
+      {/* Added MangaDex Banner */}
+      <MangaDexBanner />
+
       <form onSubmit={handleSearch} className="w-full max-w-3xl mb-8">
         <div className="flex gap-2 relative">
           <input
@@ -146,10 +156,19 @@ export default function SearchPage() {
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
                   onClick={() => handleSelectSuggestion(suggestion)}
                 >
-                  {suggestion.title}
+                  <span className="truncate mr-2">{suggestion.title}</span>
+                  <span
+                    className={`text-xs px-2 py-1 rounded flex-shrink-0 ${
+                      suggestion.source === "default"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {suggestion.source === "default" ? "Comic" : "Manga"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -170,12 +189,23 @@ export default function SearchPage() {
                     key={index}
                     className="border p-4 rounded hover:bg-gray-50"
                   >
-                    <Link
-                      href={`/comic/${comic.data}`}
-                      className="text-blue-600 hover:underline text-lg"
-                    >
-                      {comic.title}
-                    </Link>
+                    <div className="flex justify-between items-center">
+                      <Link
+                        href={`/comic/${comic.data}`}
+                        className="text-blue-600 hover:underline text-lg"
+                      >
+                        {comic.title}
+                      </Link>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          comic.source === "default"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {comic.source === "default" ? "Comic" : "Manga"}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>
